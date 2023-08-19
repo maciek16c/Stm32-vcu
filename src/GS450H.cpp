@@ -95,19 +95,19 @@ void GS450HClass::Task100Ms()
    //Param::SetInt(Param::InvStat, GS450HClass::statusFB()); //update inverter status on web interface
    gear=(Param::GetInt(Param::Gear));
 
-   if (gear == 1)
+   if (gear == HIGH_Gear)
    {
       DigIo::SP_out.Clear();
-      DigIo::SL1_out.Clear();
+      DigIo::SL1_out.Set();
       DigIo::SL2_out.Clear();
 
 
    }
 
-   if (gear == 0)
+   if (gear == LOW_Gear)
    {
       DigIo::SP_out.Clear();
-      DigIo::SL1_out.Set();
+      DigIo::SL1_out.Clear();
       DigIo::SL2_out.Set();
 
 

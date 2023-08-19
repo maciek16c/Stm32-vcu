@@ -75,6 +75,7 @@ static Chargerhw* selectedCharger = &chargerPDM;
 static Chargerint* selectedChargeInt = &UnUsed;
 static BMS BMSnone;
 static SimpBMS BMSsimp;
+static HyundaiBMS BMSHyundai;
 static DaisychainBMS BMSdaisychain;
 static BMS* selectedBMS = &BMSnone;
 
@@ -181,7 +182,9 @@ static void Ms100Task(void)
    Param::SetInt(Param::lasterr, ErrorMessage::GetLastError());
    int opmode = Param::GetInt(Param::opmode);
    utils::SelectDirection(selectedVehicle);
-   utils::CalcSOC();
+   if (Param::GetInt(Param::Type) != 3){
+      utils::CalcSOC();
+   }
 
    Param::SetInt(Param::cruisestt, selectedVehicle->GetCruiseState());
    Param::SetFloat(Param::FrontRearBal, selectedVehicle->GetFrontRearBalance());
@@ -325,6 +328,7 @@ static void Ms10Task(void)
    selectedVehicle->SetRevCounter(ABS(Param::GetInt(Param::speed)));
    selectedVehicle->SetTemperatureGauge(Param::GetFloat(Param::tmphs));
    selectedVehicle->Task10Ms();
+   selectedBMS->Task10Ms();
    if(opmode==MOD_CHARGE) selectedCharger->Task10Ms();
 
    //////////////////////////////////////////////////
@@ -375,6 +379,8 @@ switch (opmode)
       }
       IOMatrix::GetPin(IOMatrix::NEGCONTACTOR)->Set();
       IOMatrix::GetPin(IOMatrix::COOLANTPUMP)->Set();
+      if(BMSHyundai.contactor_state != 0x01)
+         stt |= STAT_UDCBELOWUDCSW;
       DigIo::prec_out.Set();//commence precharge
       if ((stt & (STAT_POTPRESSED | STAT_UDCBELOWUDCSW | STAT_UDCLIM)) == STAT_NONE)
       {
@@ -387,7 +393,7 @@ switch (opmode)
       }
       if(initbyCharge && !chargeMode) opmode = MOD_OFF;// These two statements catch a precharge hang from either start mode or run mode.
       if(initbyStart && !selectedVehicle->Ready()) opmode = MOD_OFF;
-      if (udc < (Param::GetInt(Param::udcsw)) && rtc_get_counter_val() > (vehicleStartTime + PRECHARGE_TIMEOUT))
+      if ((stt & STAT_UDCBELOWUDCSW) != STAT_NONE && rtc_get_counter_val() > (vehicleStartTime + PRECHARGE_TIMEOUT))
       {
          DigIo::prec_out.Clear();
          ErrorMessage::Post(ERR_PRECHARGE);
@@ -424,6 +430,7 @@ switch (opmode)
    ControlCabHeater(opmode);
    if (Param::GetInt(Param::Type) == 1)  SBOX::ControlContactors(opmode,canInterface[Param::GetInt(Param::ShuntCan)]);//BMW contactor box
    if (Param::GetInt(Param::Type) == 2)  VWBOX::ControlContactors(opmode,canInterface[Param::GetInt(Param::ShuntCan)]);//VW contactor box
+   if (Param::GetInt(Param::Type) == 3)  BMSHyundai.ControlContactors(opmode,canInterface[Param::GetInt(Param::BMSCan)]);//Hyundai BMS
 
 }
 
@@ -577,6 +584,10 @@ static void UpdateBMS()
          case BMSModes::BMSModeDaisychainSingleBMS:
          case BMSModes::BMSModeDaisychainDualBMS:
             selectedBMS = &BMSdaisychain;
+            break;
+         case BMSModes::BMSModeHyundai:
+            selectedBMS = &BMSHyundai;
+            Param::SetInt(Param::Type,3);
             break;
          default:
             // Default to no BMS

@@ -49,3 +49,13 @@ test_vcu
 
 # hex output - only keep for releases
 stm32_vcu.hex
+.vscode/Stm32-vcu.code-workspace
+.vscode/launch.json
+.vscode/tasks.json
+.vscode/c_cpp_properties.json
+.vscode/configurationCache.log
+Hardware/Zombie/ZombieVerter_V1_BOM_Rel(Automatycznie odzyskany).xls
+.gitignore
+Hardware/Zombie/ZombieVerter_V1 montaż.xls
+Hardware/Zombie/ZombieVerter_V1_BOM_Rel.xls
+src/stm32_vcu.cpp

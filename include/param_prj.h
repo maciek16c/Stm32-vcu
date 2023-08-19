@@ -80,7 +80,7 @@
     PARAM_ENTRY(CAT_CHARGER,   CCS_SOCLim,  "%",       0,      100,    80,     44 ) \
     PARAM_ENTRY(CAT_CHARGER,   SOCFC,       "%",       0,      100,    50,     79 ) \
     PARAM_ENTRY(CAT_CHARGER,   Chgctrl,     CHGCTRL,   0,      2,      0,      45 ) \
-    PARAM_ENTRY(CAT_BMS,       BMS_Mode,    BMSMODES,  0,      3,      0,      90 ) \
+    PARAM_ENTRY(CAT_BMS,       BMS_Mode,    BMSMODES,  0,      4,      0,      90 ) \
     PARAM_ENTRY(CAT_BMS,       BMS_Timeout,  "sec",    1,      120,    10,     91 ) \
     PARAM_ENTRY(CAT_BMS,       BMS_VminLimit, "V",     0,      10,     3.0,    92 ) \
     PARAM_ENTRY(CAT_BMS,       BMS_VmaxLimit, "V",     0,      10,     4.2,    93 ) \
@@ -108,7 +108,7 @@
     PARAM_ENTRY(CAT_IOPINS,    PWM2Func,    PINFUNCS,  0,      9,      4,      86 ) \
     PARAM_ENTRY(CAT_IOPINS,    PWM3Func,    PINFUNCS,  0,      9,      2,      87 ) \
     PARAM_ENTRY(CAT_SHUNT,     IsaInit,     ONOFF,     0,      1,      0,      75 ) \
-    PARAM_ENTRY(CAT_SHUNT,     Type,        SHNTYPE,   0,      2,      0,      88 ) \
+    PARAM_ENTRY(CAT_SHUNT,     Type,        SHNTYPE,   0,      3,      0,      88 ) \
     VALUE_ENTRY(version,       VERSTR,              2000 ) \
     VALUE_ENTRY(opmode,        OPMODES,             2002 ) \
     VALUE_ENTRY(chgtyp,        CHGTYPS,             2003 ) \
@@ -197,7 +197,7 @@
 #define VERSTR STRINGIFY(4=VER)
 #define PINFUNCS     "0=None, 1=ChaDeMoAlw, 2=OBCEnable, 3=HeaterEnable, 4=RunIndication, 5=WarnIndication," \
                      "6=CoolantPump, 7=NegContactor, 8=BrakeLight, 9=ReverseLight"
-#define SHNTYPE      "0=ISA, 1=SBOX, 2=VAG"
+#define SHNTYPE      "0=ISA, 1=SBOX, 2=VAG, 3=Hyundai"
 #define DMODES       "0=CLOSED, 1=OPEN, 2=ERROR, 3=INVALID"
 #define POTMODES     "0=SingleChannel, 1=DualChannel"
 #define BTNSWITCH    "0=Button, 1=Switch, 2=CAN"
@@ -205,7 +205,7 @@
 #define INVMODES     "0=Leaf_Gen1, 1=GS450H, 2=UserCAN, 3=OpenI, 4=Prius_Gen3, 5=Outlander, 6=GS300H"
 #define PLTMODES     "0=Absent, 1=ACStd, 2=ACchg, 3=Error, 4=CCS_Not_Rdy, 5=CCS_Rdy, 6=Static"
 #define VEHMODES     "0=BMW_E46, 1=BMW_E65, 2=Classic, 3=None, 5=BMW_E39, 6=VAG, 7=Subaru"
-#define BMSMODES     "0=Off, 1=SimpBMS, 2=TiDaisychainSingle, 3=TiDaisychainDual"
+#define BMSMODES     "0=Off, 1=SimpBMS, 2=TiDaisychainSingle, 3=TiDaisychainDual, 4=Hyundai"
 #define OPMODES      "0=Off, 1=Run, 2=Precharge, 3=PchFail, 4=Charge"
 #define DOW          "0=Sun, 1=Mon, 2=Tue, 3=Wed, 4=Thu, 5=Fri, 6=Sat"
 #define CHGTYPS      "0=Off, 1=AC, 2=DCFC"
@@ -300,7 +300,7 @@ enum ChargeModes
     Leaf_PDM = 3,
     TeslaOI = 4,
     Out_lander = 5
-
+    
 };
 
 enum ChargeInterfaces
@@ -322,7 +322,8 @@ enum BMSModes
     BMSModeNoBMS = 0,
     BMSModeSimpBMS = 1,
     BMSModeDaisychainSingleBMS = 2,
-    BMSModeDaisychainDualBMS = 3
+    BMSModeDaisychainDualBMS = 3,
+    BMSModeHyundai = 4
 };
 
 enum ChargeControl

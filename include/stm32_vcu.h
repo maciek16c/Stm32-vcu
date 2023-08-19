@@ -71,6 +71,7 @@
 #include "noHeater.h"
 #include "bms.h"
 #include "simpbms.h"
+#include "hyundai_bms.h"
 #include "daisychainbms.h"
 #include "outlanderCharger.h"
 
