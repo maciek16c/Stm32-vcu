@@ -82,7 +82,7 @@ void HyundaiBMS::DecodeCAN(int id, uint8_t *data)
    
    case ID_BMS_SOC:
      soc = ((data[1]<<8) + data[0])*0.05f;
-      Param::SetFloat(Param::KWh, (100.0f - soc) * Param::GetFloat(Param::BattCap));
+      Param::SetFloat(Param::KWh, (1.0f - (soc*0.01)) * Param::GetFloat(Param::BattCap));
       Param::SetFloat(Param::SOC,soc);
       break;
    
