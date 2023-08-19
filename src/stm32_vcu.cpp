@@ -78,6 +78,7 @@
 #include "bms.h"
 #include "simpbms.h"
 #include "leafbms.h"
+#include "hyundai_bms.h"
 #include "daisychainbms.h"
 #include "outlanderCharger.h"
 #include "Can_OBD2.h"
@@ -186,6 +187,7 @@ static SimpBMS BMSsimp;
 static LeafBMS BMSleaf;
 static DaisychainBMS BMSdaisychain;
 static KangooBMS BMSRenaultKangoo33;
+static HyundaiBMS BMSHyundai;
 static DCDC DCDCnone;
 static TeslaDCDC DCDCTesla;
 static BMS* selectedBMS = &BMSnone;
@@ -365,7 +367,7 @@ static void Ms100Task(void)
     int opmode = Param::GetInt(Param::opmode);
     utils::SelectDirection(selectedVehicle, selectedShifter);
 
-    if(Param::GetInt(Param::ShuntType) != 0)//Do not do any SOC calcs
+    if((Param::GetInt(Param::ShuntType) != 0) && (Param::GetInt(Param::ShuntType) != 4))//Do not do any SOC calcs
     {
         utils::CalcSOC();
     }
@@ -574,6 +576,7 @@ static void Ms10Task(void)
     selectedVehicle->Task10Ms();
     selectedDCDC->Task10Ms();
     selectedShifter->Task10Ms();
+    selectedBMS->Task10Ms();
     if(opmode==MOD_CHARGE)
     {
         selectedCharger->Task10Ms();
@@ -644,6 +647,11 @@ static void Ms10Task(void)
         }
         IOMatrix::GetPin(IOMatrix::NEGCONTACTOR)->Set();
         IOMatrix::GetPin(IOMatrix::COOLANTPUMP)->Set();
+        if ((Param::GetInt(Param::ShuntType) == 4 && BMSHyundai.contactor_state != 0x01) ||
+            (Param::GetInt(Param::ShuntType) != 4 && udc < Param::GetInt(Param::udcsw)))
+            {
+                stt |= STAT_UDCBELOWUDCSW;
+            }
         if(rlyDly!=0) rlyDly--;//here we are going to pause before energising precharge to prevent too many contactors pulling amps at the same time
         if(rlyDly==0) DigIo::prec_out.Set();//commence precharge
         if ((stt & (STAT_POTPRESSED | STAT_UDCBELOWUDCSW | STAT_UDCLIM)) == STAT_NONE)
@@ -665,7 +673,7 @@ static void Ms10Task(void)
         }
         if(initbyCharge && !chargeMode) opmode = MOD_OFF;// These two statements catch a precharge hang from either start mode or run mode.
         if(initbyStart && !selectedVehicle->Ready()) opmode = MOD_OFF;
-        if (udc < (Param::GetInt(Param::udcsw)) && rtc_get_counter_val() > (vehicleStartTime + PRECHARGE_TIMEOUT))
+        if ((stt & STAT_UDCBELOWUDCSW) != STAT_NONE && rtc_get_counter_val() > (vehicleStartTime + PRECHARGE_TIMEOUT))
         {
             DigIo::prec_out.Clear();
             ErrorMessage::Post(ERR_PRECHARGE);
@@ -718,6 +726,7 @@ static void Ms10Task(void)
     ControlCabHeater(opmode);
     if (Param::GetInt(Param::ShuntType) == 2)  SBOX::ControlContactors(opmode,canInterface[Param::GetInt(Param::ShuntCan)]);//BMW contactor box
     if (Param::GetInt(Param::ShuntType) == 3)  VWBOX::ControlContactors(opmode,canInterface[Param::GetInt(Param::ShuntCan)]);//VW contactor box
+    if (Param::GetInt(Param::ShuntType) == 4)  BMSHyundai.ControlContactors(opmode,canInterface[Param::GetInt(Param::BMSCan)]);//Hyundai BMS
 
 
 }
@@ -912,6 +921,9 @@ static void UpdateBMS()
         break;
     case BMSModes::BMSRenaultKangoo33BMS:
         selectedBMS = &BMSRenaultKangoo33;
+        break;
+     case BMSModes::BMSModeHyundai:
+        selectedBMS = &BMSHyundai;
         break;
     default:
         // Default to no BMS

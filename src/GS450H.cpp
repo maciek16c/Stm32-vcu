@@ -461,7 +461,8 @@ void GS450HClass::Task1Ms()
             //exchange data and prepare next HTM frame
             dma_clear_interrupt_flags(DMA1, DMA_CHANNEL6, DMA_TCIF);
             statusInv=1;
-            dc_bus_voltage=(((mth_data[82]|mth_data[83]<<8)-5)/2);
+            dcdc_voltage=(((mth_data[82]|mth_data[83]<<8)-5)/2);
+            dc_bus_voltage=((mth_data[84]|mth_data[85]<<8)/2);
             temp_inv_water=int8_t(mth_data[42]);
             temp_inv_inductor=int8_t(mth_data[86]);
             mg1_speed=mth_data[6]|mth_data[7]<<8;
