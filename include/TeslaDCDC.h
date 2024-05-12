@@ -1,7 +1,7 @@
 /*
  * This file is part of the ZombieVerter project.
  *
- * Copyright (C) 2019-2022 Damien Maguire <info@evbmw.com>
+ * Copyright (C) 2023 Damien Maguire
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,23 +17,27 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef ANAIN_PRJ_H_INCLUDED
-#define ANAIN_PRJ_H_INCLUDED
+#ifndef TeslaDCDC_H
+#define TeslaDCDC_H
+#include <stdint.h>
+#include "dcdc.h"
 
-#include "hwdefs.h"
+/* This is an interface for The Tesla GEN2 DCDC converter
+ * https://openinverter.org/wiki/Tesla_Model_S/X_DC/DC_Converter
+ */
 
-#define NUM_SAMPLES 12
-#define SAMPLE_TIME ADC_SMPR_SMP_7DOT5CYC
+class TeslaDCDC: public DCDC
+{
+   public:
+      void DecodeCAN(int, uint8_t *);
+      void DeInit() {};
+      void Task100Ms();
+      void SetCanInterface(CanHardware* c);
+   protected:
+      CanHardware* can;
+   private:
+      uint8_t timer500=0;
+};
+#endif // TeslaDCDC_H
 
-#define ANA_IN_LIST \
-   ANA_IN_ENTRY(throttle1, GPIOC, 0) \
-   ANA_IN_ENTRY(throttle2, GPIOC, 1) \
-   ANA_IN_ENTRY(uaux,      GPIOB, 1) \
-   ANA_IN_ENTRY(GP_analog1,GPIOC, 2) \
-   ANA_IN_ENTRY(GP_analog2,GPIOC, 3) \
-   ANA_IN_ENTRY(MG1_Temp,  GPIOC, 5) \
-   ANA_IN_ENTRY(MG2_Temp,  GPIOC, 4) \
-   ANA_IN_ENTRY(dummyAnal, GPIOC, 11) \
 
-//dummyAnal is used by IOMatrix class for unused functions. Must be set to a pin that has no effect
-#endif // ANAIN_PRJ_H_INCLUDED

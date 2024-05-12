@@ -71,10 +71,10 @@ void HyundaiBMS::DecodeCAN(int id, uint8_t *data)
    {
    case ID_BMS_CONTACTOR_STATUS:
       contactor_state = data[0];
-     /* if (contactor_state == 0x01) 
+      if (contactor_state == 0x01) 
          Param::SetInt(Param::opmode, MOD_RUN);
       else if (contactor_state == 0x02)
-         Param::SetInt(Param::opmode, MOD_PRECHARGE);*/
+         Param::SetInt(Param::opmode, MOD_PRECHARGE);
 
       // Reset timeout counter to the full timeout value
       timeoutCounter = Param::GetInt(Param::BMS_Timeout) * 10;
