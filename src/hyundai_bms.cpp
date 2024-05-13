@@ -139,9 +139,11 @@ void HyundaiBMS::ControlContactors(int opmode, CanHardware* can)
    if (!fault){
       if (hvRequest){
          txData200[5] |= 0x10;
+         txData200[4] |= 0x80;
       }
       else{
          txData200[5] &= ~0x10;
+         txData200[4] &= ~0x80;
       }
    }
    else{
