@@ -1,0 +1,16 @@
+{
+	"folders": [
+		{
+			"path": ".."
+		}
+	],
+	"settings": {
+		"makefile.launchConfigurations": [
+			{
+				"cwd": "/mnt/c/Users/macie/Desktop/E46/Przerobka/vcu/Stm32-vcu",
+				"binaryPath": "/mnt/c/Users/macie/Desktop/E46/Przerobka/vcu/Stm32-vcu/stm32_vcu",
+				"binaryArgs": []
+			}
+		]
+	}
+}
