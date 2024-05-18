@@ -26,8 +26,7 @@
 #define ID_BMS_SOC 0x542
 #define ID_BMS_VOLTAGE 0x588
 #define ID_BMS_CURRENT 0x5AD
-#define ID_BMS_AVAILABLE_CHARGE_POWER 0xFFF        //placeholder
-#define ID_BMS_AVAILABLE_DISCHARGE_POWER 0xFFE     //placeholder
+#define ID_BMS_AVAILABLE_POWER 0x670
 
 /*
 //! CRC 8 lookup table Polynomial:0x1 Initial Value: 0x0
