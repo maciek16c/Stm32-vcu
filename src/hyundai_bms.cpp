@@ -25,6 +25,8 @@ void HyundaiBMS::SetCanInterface(CanHardware* c)
    can->RegisterUserMessage(ID_BMS_SOC);
    can->RegisterUserMessage(ID_BMS_VOLTAGE);
    can->RegisterUserMessage(ID_BMS_CURRENT);
+   can->RegisterUserMessage(ID_BMS_AVAILABLE_POWER);
+
 }
 
 uint8_t HyundaiBMS::CRC_8(const uint8_t *DataArray, const uint8_t Length)
@@ -50,7 +52,7 @@ bool HyundaiBMS::ChargeAllowed()
    if(!BMSDataValid()) return false;
 
    // Refuse to charge if the current limit is low.
-   if(availableChargePower < 100) return false;
+   if(availableChargePower < 10) return false;
 
    // Otherwise, charging is permitted.
    return true;
@@ -96,14 +98,11 @@ void HyundaiBMS::DecodeCAN(int id, uint8_t *data)
       Param::SetFloat(Param::idc,current);
       break;
 
-   case ID_BMS_AVAILABLE_CHARGE_POWER:
-      availableChargePower = data[0];        
+   case ID_BMS_AVAILABLE_POWER:
+      availableChargePower = (data[0] + (data[1]<<8))*10;        
       Param::SetInt(Param::BMS_ChargeLim, MaxChargeCurrent());
-      break;
-   
-   case ID_BMS_AVAILABLE_DISCHARGE_POWER:
-      availableDischargePower = data[0];
-      Param::SetFloat(Param::idcmax,availableDischargePower);
+      availableDischargePower =  ((data[2] + (data[3]<<8))*10);
+      Param::SetFloat(Param::idcmax,availableDischargePower / voltage);
       break;
    default:
       break;
@@ -156,7 +155,7 @@ void HyundaiBMS::ControlContactors(int opmode, CanHardware* can)
 
 void HyundaiBMS::Task10Ms() {
 
-   Inverter_voltage[6] = Param::GetInt(Param::INVudc)/2;
+   Inverter_voltage[6] = (Param::GetInt(Param::INVudc)/2)*1.1;
    can->Send(ID_BMS_INV_VOLTAGE, (uint32_t*)Inverter_voltage,8);
    can->Send(0x200, (uint32_t*)txData200,8);
    can->Send(0x2F0, (uint32_t*)txData2F0,8);
