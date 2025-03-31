@@ -99,8 +99,8 @@ void HyundaiBMS::DecodeCAN(int id, uint8_t *data)
       break;
 
    case ID_BMS_AVAILABLE_POWER:
-      availableChargePower = (data[0] + (data[1]<<8))*10;        
-      Param::SetInt(Param::BMS_ChargeLim, MaxChargeCurrent());
+      availableChargePower = (data[0] + (data[1]<<8))*-10;        
+      Param::SetFloat(Param::idcmin,availableChargePower / voltage);
       availableDischargePower =  ((data[2] + (data[3]<<8))*10);
       Param::SetFloat(Param::idcmax,availableDischargePower / voltage);
       break;
