@@ -49,7 +49,7 @@ int16_t actAmps;
 uint8_t currentRamp;
 bool clearToStart=false , shutDownReq=false, pwmON=false;
 static uint8_t chgStatus , evseDuty;
-static float dcBusV , temp_1 , temp_2 , ACVolts , DCAmps , ACAmps;
+static float dcBusV , temp_1 , temp_2 , charger_temp_1 , charger_temp_2 , max_temp , ACVolts , DCAmps , ACAmps;
 static float LV_Volts , LV_Amps;
 static uint16_t batteryVolts;
 

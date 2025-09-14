@@ -637,14 +637,14 @@ static void Ms10Task(void)
         break;
 
     case MOD_PRECHARGE:
-        if (!chargeMode)
-        {
-            if(selectedInverter != &openInv)DigIo::inv_out.Set();//inverter power on but not if we are in charge mode and not if OI
-        }
-        else if((Param::GetInt(Param::ShuntType) == 0) && selectedInverter == &leafInv)//Shunt 0 + Leaf is precharge using leaf inverter voltage
-        {
+ //       if (!chargeMode)
+ //       {
+  //          if(selectedInverter != &openInv)DigIo::inv_out.Set();//inverter power on but not if we are in charge mode and not if OI
+ //       }
+ //       else if((Param::GetInt(Param::ShuntType) == 0) && selectedInverter == &leafInv)//Shunt 0 + Leaf is precharge using leaf inverter voltage
+ //       {
             DigIo::inv_out.Set(); //inverter power on
-        }
+ //       }
         IOMatrix::GetPin(IOMatrix::NEGCONTACTOR)->Set();
         IOMatrix::GetPin(IOMatrix::COOLANTPUMP)->Set();
         if ((Param::GetInt(Param::ShuntType) == 4 && BMSHyundai.contactor_state != 0x01) ||

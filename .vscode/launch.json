@@ -4,19 +4,40 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+        {   
+            "cwd": "${workspaceRoot}",
+            "executable": "C:/Users/macie/OneDrive/E46/Przerobka/vcu/Stm32-vcu/stm32_vcu",
+            "name": "Debug with OpenOCD",
+            "request": "launch",
+            "type": "cortex-debug",
+            "servertype": "openocd",
+            "openOCDPath":"D:/Users/Maciek/Desktop/OpenOCD-20180728/bin/openocd.exe",
+            "gdbPath": "C:/Program Files (x86)/GNU Arm Embedded Toolchain/10 2021.10/bin/arm-none-eabi-gdb",
+            "configFiles": [
+                "share/openocd/scripts/interface/stlink.cfg",
+                "share/openocd/scripts/board/stm32f103c8_blue_pill.cfg"
+            ],
+            "searchDir": ["D:/Users/Maciek/Desktop/OpenOCD-20180728"],
+            "runToEntryPoint": "main",
+            "showDevDebugOutput": "raw",
+            "liveWatch": {
+                "enabled": true,
+                "samplesPerSecond": 4
+            }
+        }/*,
         {
             "name": "Debug VCU",
             "type": "cppdbg",
             "request": "launch",
             "miDebuggerPath": "arm-none-eabi-gdb",
             "targetArchitecture": "arm",
-            "program": "${workspaceFolder}/stm32_vcu",
+            "program": "C:/Users/macie/OneDrive/E46/Przerobka/vcu/Stm32-vcu/stm32_vcu",
             "setupCommands": [
                 {
                     "text": "set target-async off"
                 },
                 {
-                    "text": "file ${workspaceFolder}/stm32_vcu"
+                    "text": "file C:/Users/macie/OneDrive/E46/Przerobka/vcu/Stm32-vcu/stm32_vcu"
                 },
                 {
                     "text": "set remote hardware-breakpoint-limit 6"
@@ -25,13 +46,16 @@
                     "text": "set remote hardware-watchpoint-limit 4"
                 },
                 {
+                    "text": "set remotetimeout 1"
+                },
+                {
                     "text": "target extended-remote localhost:3333"
                 },
                 {
                     "text": "monitor arm semihosting enable"
                 },
                 {
-                    "text": "load ${workspaceFolder}/stm32_vcu"
+                    "text": "load C:/Users/macie/OneDrive/E46/Przerobka/vcu/Stm32-vcu/stm32_vcu"
                 }
             ],
             "externalConsole": false,

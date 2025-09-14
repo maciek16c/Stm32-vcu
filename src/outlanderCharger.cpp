@@ -28,6 +28,9 @@ uint8_t outlanderCharger::evseDuty;
 float   outlanderCharger::dcBusV;
 float   outlanderCharger::temp_1;
 float   outlanderCharger::temp_2;
+float   outlanderCharger::charger_temp_1;
+float   outlanderCharger::charger_temp_2;
+float   outlanderCharger::max_temp;
 float   outlanderCharger::ACVolts;
 float   outlanderCharger::ACAmps;
 float   outlanderCharger::DCAmps;
@@ -172,21 +175,15 @@ void outlanderCharger::Task100Ms()
             OutlanderHeartBeat::SetPullInEVSE(0);
         }
 
+        max_temp = MAX(MAX(MAX(temp_1, temp_2), charger_temp_1), charger_temp_2);
+        Param::SetFloat(Param::ChgTemp, max_temp);
+        float temp_derate = MAX(0.0f, MIN(1.0f, (65.0f - max_temp) / 5.0f));
 
-        bytes[0] = setVolts >> 8;
-        bytes[1] = setVolts & 0xff;//B1+B2   = voltage setpoint    (0E74=370.0V, 0,1V/bit)
-        bytes[2] = currentRamp;//B3  = current setpoint DC-side  (78=12A -> 0,1A/bit)
-        bytes[3] = 0x00;
-        bytes[4] = 0x00;
-        bytes[5] = 0x00;
-        bytes[6] = 0x00;
-        bytes[7] = 0x00;
-        can->Send(0x286, (uint32_t*)bytes, 8);
         if(clearToStart)
         {
             if(actVolts<Param::GetInt(Param::Voltspnt)) currentRamp++;
             if(actVolts>=Param::GetInt(Param::Voltspnt)) currentRamp--;
-            if(currentRamp>=0x78) currentRamp=0x78;//clamp to max of 12A
+            if(currentRamp>= (0x78 * temp_derate)) currentRamp=0x78 * temp_derate;//clamp to max of 12A
             /* Superceeded by CPspoof on PWM3
             if(!pwmON)
               {
@@ -208,6 +205,15 @@ void outlanderCharger::Task100Ms()
              */
         }
 
+        bytes[0] = setVolts >> 8;
+        bytes[1] = setVolts & 0xff;//B1+B2   = voltage setpoint    (0E74=370.0V, 0,1V/bit)
+        bytes[2] = currentRamp;//B3  = current setpoint DC-side  (78=12A -> 0,1A/bit)
+        bytes[3] = 0x00;
+        bytes[4] = 0x00;
+        bytes[5] = 0x00;
+        bytes[6] = 0x00;
+        bytes[7] = 0x00;
+        can->Send(0x286, (uint32_t*)bytes, 8);
     }
 }
 
@@ -230,7 +236,8 @@ void outlanderCharger::handle389(uint32_t data[2])
     ACAmps = bytes[6] * 0.1; //Current in Amps from mains. scale 0.1.
     DCAmps = bytes[2] * 0.1; //Current in Amps from charger to battery. scale 0.1.
     batteryVolts = bytes[0] * 2;
-
+    charger_temp_1 = bytes[3]-40;//degC bias -45
+    charger_temp_2 = bytes[4]-40;//degC bias -45
     Param::SetFloat(Param::AC_Volts, ACVolts);
     Param::SetFloat(Param::AC_Amps, ACAmps);
 
@@ -249,7 +256,6 @@ void outlanderCharger::handle38A(uint32_t data[2])
     dcBusV = bytes[2]*2;// Volts scale 2
     temp_1 = bytes[0]-45;//degC bias -45
     temp_2 = bytes[1]-45;//degC bias -45
-    Param::SetFloat(Param::ChgTemp, MAX(temp_1, temp_2));
 }
 
 
