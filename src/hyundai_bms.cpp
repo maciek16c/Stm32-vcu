@@ -16,7 +16,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "stm32_vcu.h"
+ #include "hyundai_bms.h"
+
+ uint32_t slow_can_counter=0;
 
 void HyundaiBMS::SetCanInterface(CanHardware* c)
 {
@@ -52,7 +54,7 @@ bool HyundaiBMS::ChargeAllowed()
    if(!BMSDataValid()) return false;
 
    // Refuse to charge if the current limit is low.
-   if(availableChargePower < 10) return false;
+   if(availableChargePower > -1000) return false;
 
    // Otherwise, charging is permitted.
    return true;
@@ -73,10 +75,10 @@ void HyundaiBMS::DecodeCAN(int id, uint8_t *data)
    {
    case ID_BMS_CONTACTOR_STATUS:
       contactor_state = data[0];
-      if (contactor_state == 0x01) 
+     /* if (contactor_state == 0x01) 
          Param::SetInt(Param::opmode, MOD_RUN);
       else if (contactor_state == 0x02)
-         Param::SetInt(Param::opmode, MOD_PRECHARGE);
+         Param::SetInt(Param::opmode, MOD_PRECHARGE);*/
 
       // Reset timeout counter to the full timeout value
       timeoutCounter = Param::GetInt(Param::BMS_Timeout) * 10;
@@ -101,7 +103,9 @@ void HyundaiBMS::DecodeCAN(int id, uint8_t *data)
    case ID_BMS_AVAILABLE_POWER:
       availableChargePower = (data[0] + (data[1]<<8))*-10;        
       Param::SetFloat(Param::idcmin,availableChargePower / voltage);
+      Param::SetFloat(Param::idcmin,availableChargePower / voltage);
       availableDischargePower =  ((data[2] + (data[3]<<8))*10);
+      Param::SetFloat(Param::idcmax,availableDischargePower / voltage);
       Param::SetFloat(Param::idcmax,availableDischargePower / voltage);
       break;
    default:
@@ -154,11 +158,18 @@ void HyundaiBMS::ControlContactors(int opmode, CanHardware* can)
 }
 
 void HyundaiBMS::Task10Ms() {
-
-   Inverter_voltage[6] = (Param::GetInt(Param::INVudc)/2)*1.1;
-   can->Send(ID_BMS_INV_VOLTAGE, (uint32_t*)Inverter_voltage,8);
-   can->Send(0x200, (uint32_t*)txData200,8);
-   can->Send(0x2F0, (uint32_t*)txData2F0,8);
+   if(Param::GetInt(Param::opmode) != MOD_OFF) {
+      if(Param::GetInt(Param::opmode) == MOD_PRECHARGE) {
+      slow_can_counter++;
+      if (slow_can_counter>=50)
+         slow_can_counter=0;
+      else return;
+      }
+      Inverter_voltage[6] = (Param::GetInt(Param::INVudc)/2)*1.1;
+      can->Send(ID_BMS_INV_VOLTAGE, (uint32_t*)Inverter_voltage,8);
+      can->Send(0x200, (uint32_t*)txData200,8);
+      can->Send(0x2F0, (uint32_t*)txData2F0,8);
+   }
 }
 
 void HyundaiBMS::Task100Ms() {
@@ -166,7 +177,7 @@ void HyundaiBMS::Task100Ms() {
    if(timeoutCounter > 0) timeoutCounter--;
 
    uint8_t opmode = Param::GetInt(Param::opmode);
-   if(opmode==MOD_RUN || opmode==MOD_PRECHARGE || opmode ==MOD_CHARGE){
+   if(opmode!=MOD_OFF){
       BCM_data [0] = 0x60;
       BCM_data [2] = 0x60;
    }

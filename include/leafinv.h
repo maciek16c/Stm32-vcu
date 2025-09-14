@@ -18,6 +18,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 #ifndef LEAFINV_H
 #define LEAFINV_H
 
@@ -35,13 +36,12 @@ public:
    void SetTorque(float torque);
    float GetMotorTemperature() { return motor_temp; }
    float GetInverterTemperature() { return inv_temp; }
-   float GetInverterVoltage() { return voltage / 2; }
+   float GetInverterVoltage() { return voltage; }
    float GetMotorSpeed() { return speed; }
    int GetInverterState() { return error; }
    void SetCanInterface(CanHardware* c);
-
 private:
-   static void nissan_crc(uint8_t *data, uint8_t polynomial);
+   uint8_t nissan_crc(uint8_t *data);
    static int8_t fahrenheit_to_celsius(uint16_t fahrenheit);
    uint32_t lastRecv;
    int16_t speed;

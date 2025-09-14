@@ -16,31 +16,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 #ifndef LEAFBMS_H
 #define LEAFBMS_H
-#include <stdint.h>
+#include "bms.h"
 
-class LeafBMS
+class LeafBMS: public BMS
 {
-   public:
-      static void DecodeCAN(int id, uint32_t data[2], uint32_t time);
-      static void RequestNextFrame();
-      static uint16_t GetCellVoltage(int idx);
-      static int GetCellStatus(int idx);
-      static void Send10msMessages();
-      static void Send100msMessages();
-      static bool Alive(uint32_t time);
-      static const int NUMCELLS = 96;
-
-   private:
-      static uint8_t Crc8ForHCM(int n, uint8_t *msg);
-      static int bmsGrp;
-      static int bmsGrpIndex;
-      static uint8_t voltBytes[NUMCELLS * 2];
-      static uint8_t statusBits[NUMCELLS / 4];
-      static uint8_t run10ms;
-      static uint8_t run100ms;
-      static uint32_t lastRecv;
+public:
+    void SetCanInterface(CanHardware* can) override;
+    void DecodeCAN(int id, uint8_t * data) override;
+private:
+    bool isMessageCorrupt(uint8_t *data);
 };
 
 #endif // LEAFBMS_H

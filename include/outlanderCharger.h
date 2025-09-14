@@ -17,11 +17,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- *Control of the Mitsubishi Outlander PHEV on board charger (OBC) and DCDC Converter.
- *
  */
+
 #ifndef OUTLANDERCHARGER_H
 #define OUTLANDERCHARGER_H
+
+/* Control of the Mitsubishi Outlander PHEV on board charger (OBC) and DCDC Converter. */
 
 #include <stdint.h>
 #include "my_fp.h"
@@ -48,8 +49,9 @@ int16_t actAmps;
 uint8_t currentRamp;
 bool clearToStart=false , shutDownReq=false, pwmON=false;
 static uint8_t chgStatus , evseDuty;
-static float dcBusV , temp_1 , temp_2 , ACVolts , DCAmps , ACAmps;
+static float dcBusV , temp_1 , temp_2 , charger_temp_1 , charger_temp_2 , max_temp , ACVolts , DCAmps , ACAmps;
 static float LV_Volts , LV_Amps;
+static uint16_t batteryVolts;
 
 static void handle377(uint32_t data[2]);
 static void handle389(uint32_t data[2]);

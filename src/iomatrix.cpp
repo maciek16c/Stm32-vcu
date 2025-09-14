@@ -1,6 +1,7 @@
 /*
  * This file is part of the stm32-... project.
  *
+ * Copyright (C) 2024 Tom de Bree <tom@voltinflux.com>
  * Copyright (C) 2021 Johannes Huebner <dev@johanneshuebner.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,12 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 #include "iomatrix.h"
 
 DigIo* const IOMatrix::paramToPin[] = { &DigIo::gp_out1, &DigIo::gp_out2, &DigIo::gp_out3,
                                         &DigIo::SL1_out, &DigIo::SL2_out,
                                         &DigIo::PWM1, &DigIo::PWM2, &DigIo::PWM3,&DigIo::gp_12Vin,
-                                        &DigIo::HV_req};
+                                        &DigIo::HV_req,&DigIo::gear1_in,&DigIo::gear2_in,&DigIo::gear3_in};
                                         //order of these matters!
 
 AnaIn* const IOMatrix::paramToPinAnalgue[] = {
@@ -37,9 +39,14 @@ void IOMatrix::AssignFromParams()
       functionToPin[i] = &DigIo::dummypin;
    }
 
-   for (int i = 0; i < numPins; i++)
+   for (int i = 0; i < 10; i++)//First orignal IO pin params
    {
-      functionToPin[Param::GetInt((Param::PARAM_NUM)(FIRST_IO_PARAM + i))] = paramToPin[i];
+      functionToPin[Param::GetInt((Param::PARAM_NUM)(FIRST_IO_PARAM + i))] = paramToPin[i]; //Hard coded so hard coded bodge to fix
+   }
+
+   for (int i = 10; i < numPins; i++)//PB1 PB2 PB3 params
+   {
+      functionToPin[Param::GetInt((Param::PARAM_NUM)(SEC_IO_PARAM + i-10))] = paramToPin[i]; //Hard coded so hard coded bodge to fix
    }
 }
 

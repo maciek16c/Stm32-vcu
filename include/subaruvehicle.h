@@ -16,11 +16,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 #ifndef SUBARUVEHICLE_H
 #define SUBARUVEHICLE_H
 
 #include <vehicle.h>
-
+#include "utils.h"
 
 class SubaruVehicle : public Vehicle
 {

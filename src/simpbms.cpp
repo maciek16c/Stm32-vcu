@@ -17,7 +17,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "stm32_vcu.h"
+#include "simpbms.h"
+
 /*
  * This module receives messages from SimpBMS and updates the
  * BMS_MinV, BMS_MaxV, BMS_MinT and BMS_MaxT parameters with the
@@ -63,7 +64,7 @@ bool SimpBMS::ChargeAllowed()
 float SimpBMS::MaxChargeCurrent()
 {
    if(!ChargeAllowed()) return 0;
-   return chargeCurrentLimit / 1000.0;
+   return chargeCurrentLimit * 0.1;
 }
 
 // Process voltage and temperature message from SimpBMS.

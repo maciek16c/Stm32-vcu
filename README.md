@@ -1,21 +1,29 @@
-# stm32-vcu
+# stm32-vcu (ZombieVerter VCU)
+
+[![Build status](../../actions/workflows/CI-build.yml/badge.svg)](../../actions/workflows/CI-build.yml)
+
 Project based on the OpenInverter System by Johannes Huebner to provide a universal VCU (Vehicle Control Unit) for electric vehicle conversion projects. 
 
 Please visit the development thread on the Openinverter Forum for more information : https://openinverter.org/forum/viewtopic.php?f=3&t=1277
+![Screenshot from 2025-01-28 14-17-28](https://github.com/user-attachments/assets/ff066c9e-8c79-470d-aa04-bc3b34198900)
 
+## Videos on progress
 
-Video on progress : https://vimeo.com/506480876
+Project introduction : https://vimeo.com/506480876
 
 V1.11a On dyno with GS450h / BMW E39 : https://vimeo.com/802405172
 
 V2.00a now available : https://vimeo.com/824494783?share=copy
 
-V2.05a now available.
+V2.15a now available : https://www.youtube.com/watch?v=iwB3wxCEFo0
 
-# Features
+V2.20A now available : https://www.youtube.com/watch?v=wjlucUWX_lc
+
+# Supported components
 
 - Nissan Leaf Gen1/2/3 inverter via CAN
-- Nissan Leaf Gen2 PDM (Charger and DCDC)
+- Nissan Leaf Gen1/2/3 PDM (Charger and DCDC)
+- Nissan LEAF Battery (all variants)
 - Mitsubishi Outlander Support
 - Mitsubishi Outlander drivetrain (front and rear motors/inverters) Support
 - Modular BMS / SimpBMS Support
@@ -41,6 +49,10 @@ V2.05a now available.
 
 # Compiling
 You will need the arm-none-eabi toolchain: https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads
+On Linux this can be installed by typing:
+
+`sudo apt install gcc-arm-none-eabi`
+
 The only external depedencies are libopencm3 and libopeninv. You can download and build this dependency by typing
 
 `make get-deps`
@@ -51,15 +63,13 @@ Now you can compile stm32-vcu by typing
 
 # Tests
 
-`cd tests`
-
 Build the tests
 
-`make`
+`make Tests`
 
 Run the tests
 
-`./test_vcu`
+`./test/test_vcu`
 
 And upload it to your board using a JTAG/SWD adapter, the updater.py script or the esp8266 web interface
 

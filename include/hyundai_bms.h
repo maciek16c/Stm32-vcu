@@ -20,6 +20,7 @@
 #ifndef HYUNDAI_BMS_H
 #define HYUNDAI_BMS_H
 #include <stdint.h>
+#include "bms.h"
 
 #define ID_BMS_CONTACTOR_STATUS 0x1FF
 #define ID_BMS_INV_VOLTAGE 0x2A1

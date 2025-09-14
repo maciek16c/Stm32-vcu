@@ -16,10 +16,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 #include "BMW_E39.h"
 #include "stm32_can.h"
 #include "utils.h"
 #include "digio.h"
+#include "my_math.h"
 
 static uint8_t counter_329 = 0;
 static uint8_t ABSMsg = 0;
