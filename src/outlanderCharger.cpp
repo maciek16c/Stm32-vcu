@@ -171,7 +171,7 @@ void outlanderCharger::Task100Ms() {
 
     max_temp = MAX(MAX(MAX(temp_1, temp_2), charger_temp_1), charger_temp_2);
     Param::SetFloat(Param::ChgTemp, max_temp);
-    float temp_derate = MAX(0.0f, MIN(1.0f, (65.0f - max_temp) / 5.0f));
+    float temp_derate = MAX(0.0f, MIN(1.0f, (80.0f - max_temp) / 5.0f));
 
     if (clearToStart) {
       if (actVolts < Param::GetInt(Param::Voltspnt))
