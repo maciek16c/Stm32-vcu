@@ -178,21 +178,24 @@ void outlanderCharger::Task100Ms() {
         currentRamp++;
       if (actVolts >= Param::GetInt(Param::Voltspnt))
         currentRamp--;
-      if(currentRamp>= (0x78 * temp_derate))
-        currentRamp=0x78 * temp_derate;//clamp to max of 12A or lower if overheating
+      if (currentRamp >= (0x78 * temp_derate))
+        currentRamp =
+            0x78 * temp_derate; // clamp to max of 12A or lower if overheating
       Charging = true;
     } else {
       currentRamp = 0;
     }
     bytes[0] = setVolts >> 8;
-    bytes[1] = setVolts & 0xff;//B1+B2   = voltage setpoint    (0E74=370.0V, 0,1V/bit)
-    bytes[2] = currentRamp;//B3  = current setpoint DC-side  (78=12A -> 0,1A/bit)
+    bytes[1] = setVolts &
+               0xff; // B1+B2   = voltage setpoint    (0E74=370.0V, 0,1V/bit)
+    bytes[2] =
+        currentRamp; // B3  = current setpoint DC-side  (78=12A -> 0,1A/bit)
     bytes[3] = 0x00;
     bytes[4] = 0x00;
     bytes[5] = 0x00;
     bytes[6] = 0x00;
     bytes[7] = 0x00;
-    can->Send(0x286, (uint32_t*)bytes, 8);
+    can->Send(0x286, (uint32_t *)bytes, 8);
   } else {
     Charging = false;
     OutlanderHeartBeat::SetPullInEVSE(0);
