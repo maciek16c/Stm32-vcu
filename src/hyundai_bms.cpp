@@ -158,7 +158,7 @@ void HyundaiBMS::Task10Ms() {
       else
         return;
     }
-    Inverter_voltage[6] = (Param::GetInt(Param::INVudc) / 2) * 1.1;
+    Inverter_voltage[6] = (Param::GetInt(Param::INVudc) / 2) * 1.025;
     can->Send(ID_BMS_INV_VOLTAGE, (uint32_t *)Inverter_voltage, 8);
     can->Send(0x200, (uint32_t *)txData200, 8);
     can->Send(0x2F0, (uint32_t *)txData2F0, 8);
