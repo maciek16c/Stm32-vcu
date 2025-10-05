@@ -70,6 +70,7 @@
 #include "heater.h"
 #include "hwdefs.h"
 #include "hwinit.h"
+#include "hyundai_bms.h"
 #include "i3LIM.h"
 #include "inverter.h"
 #include "iomatrix.h"
@@ -200,6 +201,7 @@ static SimpBMS BMSsimp;
 static LeafBMS BMSleaf;
 static DaisychainBMS BMSdaisychain;
 static KangooBMS BMSRenaultKangoo33;
+static HyundaiBMS BMSHyundai;
 static DCDC DCDCnone;
 static TeslaDCDC DCDCTesla;
 static ElconDCDC ElconDC;
@@ -386,7 +388,8 @@ static void Ms100Task(void) {
   int opmode = Param::GetInt(Param::opmode);
   utils::SelectDirection(selectedVehicle, selectedShifter);
 
-  if (Param::GetInt(Param::ShuntType) != 0) // Do not do any SOC calcs
+  if ((Param::GetInt(Param::ShuntType) != 0) &&
+      (Param::GetInt(Param::ShuntType) != 5)) // Do not do any SOC calcs
   {
     utils::CalcSOC();
   }
@@ -680,6 +683,7 @@ static void Ms10Task(void) {
   selectedVehicle->Task10Ms();
   selectedDCDC->Task10Ms();
   selectedShifter->Task10Ms();
+  selectedBMS->Task10Ms();
   if (opmode == MOD_CHARGE) {
     selectedCharger->Task10Ms();
   } else if (Param::GetInt(Param::chargemodes) == ChargeModes::Leaf_PDM) {
@@ -759,18 +763,27 @@ static void Ms10Task(void) {
     break;
 
   case MOD_PRECHARGE:
-    if (!chargeMode) {
-      if (selectedInverter != &openInv)
-        DigIo::inv_out.Set(); // inverter power on but not if we are in charge
-                              // mode and not if OI
-    } else if ((Param::GetInt(Param::ShuntType) == 0) &&
-               selectedInverter == &leafInv) // Shunt 0 + Leaf is precharge
-                                             // using leaf inverter voltage
-    {
-      DigIo::inv_out.Set(); // inverter power on
-    }
+    //    if (!chargeMode) {
+    //      if (selectedInverter != &openInv)
+    //        DigIo::inv_out.Set(); // inverter power on but not if we are in
+    //        charge
+    //                             // mode and not if OI
+    //    } else if ((Param::GetInt(Param::ShuntType) == 0) &&
+    //               selectedInverter == &leafInv) // Shunt 0 + Leaf is
+    //               precharge
+    //                                            // using leaf inverter voltage
+    //    {
+    DigIo::inv_out.Set(); // inverter power on
+                          //    }
     IOMatrix::GetPin(IOMatrix::NEGCONTACTOR)->Set();
     IOMatrix::GetPin(IOMatrix::COOLANTPUMP)->Set();
+    if ((Param::GetInt(Param::ShuntType) == 5 &&
+         BMSHyundai.contactor_state !=
+             0x01) || // BMS controls contactors, wait for main contactor closed
+        (Param::GetInt(Param::ShuntType) != 5 &&
+         udc < Param::GetInt(Param::udcsw))) {
+      stt |= STAT_UDCBELOWUDCSW;
+    }
     if (rlyDly != 0)
       rlyDly--; // here we are going to pause before energising precharge to
                 // prevent too many contactors pulling amps at the same time
@@ -803,7 +816,7 @@ static void Ms10Task(void) {
     if (preheater.GetInitByPreHeat() && !preheater.GetRunPreHeat())
       opmode = MOD_OFF;
 
-    if (udc < (Param::GetInt(Param::udcsw)) &&
+    if ((stt & STAT_UDCBELOWUDCSW) != STAT_NONE &&
         rtc_get_counter_val() > (vehicleStartTime + PRECHARGE_TIMEOUT)) {
       DigIo::prec_out.Clear();
       ErrorMessage::Post(ERR_PRECHARGE);
@@ -882,6 +895,9 @@ static void Ms10Task(void) {
     VWBOX::ControlContactors(
         opmode,
         canInterface[Param::GetInt(Param::ShuntCan)]); // VW contactor box
+  if (Param::GetInt(Param::ShuntType) == 5)
+    BMSHyundai.ControlContactors(
+        opmode, canInterface[Param::GetInt(Param::BMSCan)]); // Hyundai BMS
 }
 
 static void Ms1Task(void) {
@@ -1073,6 +1089,9 @@ static void UpdateBMS() {
     break;
   case BMSModes::BMSRenaultKangoo33BMS:
     selectedBMS = &BMSRenaultKangoo33;
+    break;
+  case BMSModes::BMSModeHyundai:
+    selectedBMS = &BMSHyundai;
     break;
   default:
     // Default to no BMS
