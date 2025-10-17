@@ -98,8 +98,11 @@ void BMW_E39::Msg316() // DME1
   // etc.) (in %) byte 7 - md_ind_lm_ist -- theoretical engine torque from air
   // mass, excluding igntion angle (in %)
 
-  speed_input = MAX(750, speed_input);
-  speed_input = MIN(7000, speed_input);
+  if (Param::GetInt(Param::opmode) == MOD_RUN) {
+    speed_input = MAX(750, speed_input);
+    speed_input = MIN(7000, speed_input);
+  } else
+    speed_input = 0;
 
   uint8_t rpm_to_can_mult = 64;
   uint8_t rpm_to_can_div = 10;
@@ -111,7 +114,9 @@ void BMW_E39::Msg316() // DME1
   uint8_t bytes[8];
 
   // Byte 0 - Status - 0x01 is Terminal 15 Status, 0x04 is Traction Control OK
-  bytes[0] = 0x05;
+  bytes[0] = Param::GetBool(Param::T15Stat) |
+             (Param::GetBool(Param::din_start) << 4) | 0x04;
+  bytes[0] |= 0x04;
   // Byte 1 - Torque with all interventions
   bytes[1] = 0x00;
   // Byte 2 / 3 "Engine" RPM, RPM * 6.4. 16 bits, Intel LSB (LSB,MSB)
