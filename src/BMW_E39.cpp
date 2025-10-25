@@ -114,7 +114,7 @@ void BMW_E39::Msg316() // DME1
   uint8_t bytes[8];
 
   // Byte 0 - Status - 0x01 is Terminal 15 Status, 0x04 is Traction Control OK
-  bytes[0] = Param::GetBool(Param::T15Stat) |= 0x04;
+  bytes[0] = Param::GetBool(Param::T15Stat) | 0x04;
   // Byte 1 - Torque with all interventions
   bytes[1] = 0x00;
   // Byte 2 / 3 "Engine" RPM, RPM * 6.4. 16 bits, Intel LSB (LSB,MSB)
